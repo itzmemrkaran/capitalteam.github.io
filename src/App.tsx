@@ -12,6 +12,20 @@ type Project = {
 }
 
 const wp = 'https://capitalteam.co.uk/wp-content/uploads'
+const appBase = import.meta.env.BASE_URL || '/'
+const useHashRouting = import.meta.env.VITE_HASH_ROUTING === 'true'
+
+function assetPath(path: string) {
+  return `${appBase}${path.replace(/^\//, '')}`
+}
+
+function routeHref(path: string) {
+  return useHashRouting ? `${appBase}#${path}` : path
+}
+
+function currentRoute() {
+  return useHashRouting ? window.location.hash.replace(/^#/, '') || '/' : window.location.pathname
+}
 
 const projects: Project[] = [
   {
@@ -292,14 +306,18 @@ function Icon({ name, size = 20 }: { name: string; size?: number }) {
 }
 
 function useRouter() {
-  const [path, setPath] = useState(window.location.pathname)
+  const [path, setPath] = useState(currentRoute)
   useEffect(() => {
-    const handler = () => setPath(window.location.pathname)
+    const handler = () => setPath(currentRoute())
     window.addEventListener('popstate', handler)
-    return () => window.removeEventListener('popstate', handler)
+    window.addEventListener('hashchange', handler)
+    return () => {
+      window.removeEventListener('popstate', handler)
+      window.removeEventListener('hashchange', handler)
+    }
   }, [])
   const go = (to: string) => {
-    window.history.pushState({}, '', to)
+    window.history.pushState({}, '', routeHref(to))
     setPath(to)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -307,13 +325,13 @@ function useRouter() {
 }
 
 function Link({ to, go, children, className = '', onClick }: { to: string; go: (to: string) => void; children: ReactNode; className?: string; onClick?: () => void }) {
-  return <a href={to} className={className} onClick={(event) => { event.preventDefault(); onClick?.(); go(to) }}>{children}</a>
+  return <a href={routeHref(to)} className={className} onClick={(event) => { event.preventDefault(); onClick?.(); go(to) }}>{children}</a>
 }
 
 function Logo({ go }: { go: (to: string) => void }) {
   return (
     <Link to="/" go={go} className="logo" aria-label="Capital Marine and Civil Construction Pvt Ltd home">
-      <img className="logo-image" src="/assets/capital-official-logo.png" alt="Capital — United Kingdom, Republic of Maldives, Sri Lanka and Singapore. A member of MeeMan Foundation." />
+      <img className="logo-image" src={assetPath('/assets/capital-official-logo.png')} alt="Capital — United Kingdom, Republic of Maldives, Sri Lanka and Singapore. A member of MeeMan Foundation." />
     </Link>
   )
 }
@@ -421,7 +439,7 @@ function Home({ go }: { go: (to: string) => void }) {
         </div>
         <div className="shell hero-bottom">
           <div className="hero-proof"><span>Trusted across</span><strong>UK · Maldives · Sri Lanka · Worldwide</strong></div>
-          <a href="#introduction" className="scroll-cue"><span>Scroll to discover</span><i><Icon name="chevron" size={16} /></i></a>
+          <button className="scroll-cue" onClick={() => document.querySelector('#introduction')?.scrollIntoView({ behavior: 'smooth' })}><span>Scroll to discover</span><i><Icon name="chevron" size={16} /></i></button>
         </div>
       </section>
 
@@ -611,7 +629,7 @@ function OpeningIntro({ state }: { state: 'show' | 'hide' | 'done' }) {
       <div className="intro-ring ring-two" />
       <div className="intro-logo-circle">
         <span className="intro-sweep" />
-        <img src="/assets/capital-official-logo.png" alt="Capital" />
+        <img src={assetPath('/assets/capital-official-logo.png')} alt="Capital" />
       </div>
       <div className="intro-caption">
         <span />
