@@ -405,7 +405,7 @@ function ProjectCard({ project, go }: { project: Project; go: (to: string) => vo
   return (
     <article className="project-card" data-reveal>
       <Link to={`/our-projects/${project.slug}/`} go={go} className="project-image">
-        <img src={project.image} alt={`${project.title} project`} />
+        <img src={project.image} alt={`${project.title} project`} loading="lazy" decoding="async" />
         <span className="project-arrow"><Icon name="arrow" /></span>
       </Link>
       <div className="project-card-body">
@@ -437,6 +437,15 @@ function Home({ go }: { go: (to: string) => void }) {
           <p>We bring experts, partners and resources together to develop, fund and deliver meaningful projects around the world.</p>
           <div className="hero-actions"><Link to="/our-projects/" go={go} className="button primary">Explore our work<Icon name="arrow" /></Link><Link to="/about-us/" go={go} className="button glass">Discover our story</Link></div>
         </div>
+        <aside className="hero-capability" aria-label="Company capabilities">
+          <div className="capability-head"><span>Core capabilities</span><i><Icon name="layers" size={18} /></i></div>
+          <div className="capability-list">
+            <span><b>01</b>Marine infrastructure</span>
+            <span><b>02</b>Coastal engineering</span>
+            <span><b>03</b>Civil construction</span>
+          </div>
+          <div className="capability-foot"><span className="live-dot" />Delivering projects worldwide</div>
+        </aside>
         <div className="shell hero-bottom">
           <div className="hero-proof"><span>Trusted across</span><strong>UK · Maldives · Sri Lanka · Worldwide</strong></div>
           <button className="scroll-cue" onClick={() => document.querySelector('#introduction')?.scrollIntoView({ behavior: 'smooth' })}><span>Scroll to discover</span><i><Icon name="chevron" size={16} /></i></button>
@@ -688,7 +697,7 @@ export default function App() {
       <OpeningIntro state={introState} />
       <div className={`app site-stage ${introState === 'hide' || introState === 'done' ? 'is-revealed' : ''}`}>
         <Header go={go} active={slug} />
-        <main>{page}</main>
+        <main key={path} className="page-view">{page}</main>
         <Footer go={go} />
       </div>
     </>
